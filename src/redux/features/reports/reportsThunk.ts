@@ -1,5 +1,5 @@
 import { reportsApi } from "@/lib/api/reports.api";
-import { getErrorMessage } from "@/lib/utils";
+import { getErrorMessage } from "@/lib/utils/get-error-message";
 import { ReportStatus, FetchReportsPayload } from "@/types/report.types";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
