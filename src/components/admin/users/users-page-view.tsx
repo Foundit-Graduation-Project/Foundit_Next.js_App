@@ -56,11 +56,13 @@ export function UsersPageView() {
       {/* Header section with heading and Add button */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-gray-900">User Management</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 text-center sm:text-left">
+            User Management
+          </h2>
         </div>
         <Button 
           onClick={() => setIsAddUserOpen(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm flex items-center h-10 px-5 rounded-full"
+          className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white shadow-sm flex items-center justify-center h-11 sm:h-10 px-6 rounded-full font-semibold transition-all hover:shadow-lg active:scale-95"
         >
           <Plus className="mr-2 h-4 w-4" />
           New User

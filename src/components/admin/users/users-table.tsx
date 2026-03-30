@@ -1,6 +1,7 @@
 import React from "react";
 import { UserStatusBadge } from "./user-status-badge";
 import { UserActionsDropdown } from "./user-actions-dropdown";
+import { UserDetailsCard } from "./user-details-card";
 import { usersApi } from "@/lib/api/users.api";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,7 @@ export function UsersTable({
   onUserUpdate,
 }: UsersTableProps) {
   
+  const [selectedUser, setSelectedUser] = React.useState<any | null>(null);
   const totalPages = Math.ceil(totalCount / limit);
   const showingEnd = Math.min(currentPage * limit, totalCount);
 
@@ -46,18 +48,19 @@ export function UsersTable({
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <>
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm whitespace-nowrap">
           <thead>
             <tr className="border-b border-gray-100 text-[11px] font-bold text-gray-500 uppercase tracking-[0.1em]">
-              <th className="px-6 py-4 font-bold">User</th>
-              <th className="px-6 py-4 font-bold">Role</th>
-              <th className="px-6 py-4 font-bold">Community</th>
-              <th className="px-6 py-4 font-bold">Credits</th>
-              <th className="px-6 py-4 font-bold">Trust Score</th>
+              <th className="px-4 sm:px-6 py-4 font-bold">User</th>
+              <th className="px-6 py-4 font-bold hidden sm:table-cell">Role</th>
+              <th className="px-6 py-4 font-bold hidden lg:table-cell">Community</th>
+              <th className="px-6 py-4 font-bold hidden md:table-cell">Credits</th>
+              <th className="px-6 py-4 font-bold hidden md:table-cell">Trust Score</th>
               <th className="px-6 py-4 font-bold">Status</th>
-              <th className="px-6 py-4 text-center font-bold">Actions</th>
+              <th className="px-4 sm:px-6 py-4 text-center font-bold">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
@@ -75,7 +78,7 @@ export function UsersTable({
               </tr>
             ) : (
               users.map((user) => {
-                const isUnlimited = user.credits > 9999 || user.plan === "Premium";
+                const isUnlimited = user.credits > 9999 || user.plan === "Premium" || user.role === "super_admin";
                 const creditText = isUnlimited ? "Unlimited" : `${user.credits || 0} Left`;
                 const trustScore = user.trustScore ?? 100;
                 const tsColor = getTrustScoreColor(trustScore);
@@ -103,24 +106,24 @@ export function UsersTable({
                     </td>
 
                     {/* Role */}
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4 hidden sm:table-cell">
                       <UserStatusBadge type="role" value={user.role} />
                     </td>
 
                     {/* Community */}
-                    <td className="px-6 py-4 text-gray-600 font-medium">
+                    <td className="px-6 py-4 text-gray-600 font-medium hidden lg:table-cell">
                       {user.community?.name || "Global / None"}
                     </td>
 
                     {/* Credits */}
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4 hidden md:table-cell">
                       <span className={`font-semibold text-[13.5px] ${isUnlimited ? "text-blue-600" : "text-gray-900"}`}>
                         {creditText}
                       </span>
                     </td>
 
                     {/* Trust Score */}
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4 hidden md:table-cell">
                       <div className="flex flex-col gap-1.5 w-24">
                         <span className={`text-[13px] font-bold ${tsColor.split(" ")[0]}`}>
                           {trustScore}%
@@ -140,11 +143,12 @@ export function UsersTable({
                     </td>
 
                     {/* Actions */}
-                    <td className="px-6 py-4 text-center">
+                    <td className="px-4 sm:px-6 py-4 text-center">
                       <UserActionsDropdown 
                         user={user} 
                         onUpdate={onUserUpdate} 
                         onStatusChange={handleStatusChange} 
+                        onViewProfile={() => setSelectedUser(user)}
                       />
                     </td>
                   </tr>
@@ -157,55 +161,61 @@ export function UsersTable({
 
       {/* Pagination Footer */}
       {!loading && users.length > 0 && (
-        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50/50">
-          <div className="text-sm text-gray-500">
+        <div className="flex flex-col sm:flex-row items-center justify-between px-6 py-4 gap-4 border-t border-gray-100 bg-gray-50/50">
+          <div className="text-sm text-gray-500 order-2 sm:order-1">
             Showing <span className="font-bold text-gray-900">{showingEnd}</span> of <span className="font-bold text-gray-900">{totalCount.toLocaleString()}</span> users
           </div>
           
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-1 order-1 sm:order-2">
             <Button
               variant="outline"
               size="icon"
               onClick={() => onPageChange(currentPage - 1)}
               disabled={currentPage <= 1}
-              className="h-8 w-8 rounded-full border-gray-200 text-gray-500"
+              className="h-9 w-9 sm:h-8 sm:w-8 rounded-full border-gray-200 text-gray-500 bg-white"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
             
-            {Array.from({ length: Math.min(5, totalPages) }).map((_, idx) => {
-              // Basic logic to show current and surrounding pages, but if totalPages < 5 just show all.
-              let pageToShow = idx + 1;
-              if (totalPages > 5 && currentPage > 3) {
-                 pageToShow = currentPage - 2 + idx;
-                 if (pageToShow > totalPages) return null;
-              }
-              
-              const isCurrent = pageToShow === currentPage;
-              return (
-                <Button
-                  key={pageToShow}
-                  variant={isCurrent ? "default" : "ghost"}
-                  size="icon"
-                  className={`h-8 w-8 rounded-full text-sm font-semibold ${
-                    isCurrent ? "bg-blue-600 hover:bg-blue-700 text-white" : "text-gray-600"
-                  }`}
-                  onClick={() => onPageChange(pageToShow)}
-                >
-                  {pageToShow}
-                </Button>
-              );
-            })}
+            <div className="hidden sm:flex items-center space-x-1">
+              {Array.from({ length: Math.min(5, totalPages) }).map((_, idx) => {
+                let pageToShow = idx + 1;
+                if (totalPages > 5 && currentPage > 3) {
+                   pageToShow = currentPage - 2 + idx;
+                   if (pageToShow > totalPages) return null;
+                }
+                
+                const isCurrent = pageToShow === currentPage;
+                return (
+                  <Button
+                    key={pageToShow}
+                    variant={isCurrent ? "default" : "ghost"}
+                    size="icon"
+                    className={`h-8 w-8 rounded-full text-sm font-semibold transition-all ${
+                      isCurrent ? "bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20" : "text-gray-600"
+                    }`}
+                    onClick={() => onPageChange(pageToShow)}
+                  >
+                    {pageToShow}
+                  </Button>
+                );
+              })}
+            </div>
+
+            {/* Mobile Page Indicator */}
+            <div className="sm:hidden px-3 text-sm font-bold text-gray-700">
+              Page {currentPage} of {totalPages}
+            </div>
 
             {totalPages > 5 && currentPage < totalPages - 2 && (
-              <span className="text-gray-400 px-1">...</span>
+              <span className="hidden sm:inline text-gray-400 px-1">...</span>
             )}
             
             {totalPages > 5 && currentPage < totalPages - 2 && (
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 rounded-full text-sm font-semibold text-gray-600"
+                className="hidden sm:inline-flex h-8 w-8 rounded-full text-sm font-semibold text-gray-600"
                 onClick={() => onPageChange(totalPages)}
               >
                 {totalPages}
@@ -217,13 +227,20 @@ export function UsersTable({
               size="icon"
               onClick={() => onPageChange(currentPage + 1)}
               disabled={currentPage >= totalPages}
-              className="h-8 w-8 rounded-full border-gray-200 text-gray-500"
+              className="h-9 w-9 sm:h-8 sm:w-8 rounded-full border-gray-200 text-gray-500 bg-white"
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
         </div>
       )}
-    </div>
+      </div>
+
+      <UserDetailsCard 
+        user={selectedUser} 
+        isOpen={!!selectedUser} 
+        onClose={() => setSelectedUser(null)} 
+      />
+    </>
   );
 }

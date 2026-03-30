@@ -13,9 +13,10 @@ interface UserActionsDropdownProps {
   user: any;
   onUpdate: () => void;
   onStatusChange: (id: string, newStatus: "active" | "banned") => Promise<void>;
+  onViewProfile: () => void;
 }
 
-export function UserActionsDropdown({ user, onUpdate, onStatusChange }: UserActionsDropdownProps) {
+export function UserActionsDropdown({ user, onUpdate, onStatusChange, onViewProfile }: UserActionsDropdownProps) {
   const [loading, setLoading] = useState(false);
   const isBanned = user.status === "banned";
 
@@ -40,7 +41,10 @@ export function UserActionsDropdown({ user, onUpdate, onStatusChange }: UserActi
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48 shadow-lg border-gray-100 rounded-xl p-1.5">
-        <DropdownMenuItem className="flex items-center gap-2 cursor-pointer font-medium py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:text-blue-600 focus:bg-blue-50 rounded-lg">
+        <DropdownMenuItem 
+          onClick={onViewProfile}
+          className="flex items-center gap-2 cursor-pointer font-medium py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:text-blue-600 focus:bg-blue-50 rounded-lg"
+        >
           <User className="h-4 w-4" />
           View Profile
         </DropdownMenuItem>
