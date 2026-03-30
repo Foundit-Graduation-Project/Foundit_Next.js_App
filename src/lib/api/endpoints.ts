@@ -13,4 +13,11 @@ export const ENDPOINTS = {
   TRANSACTIONS: "/admin/transactions",
   BROADCASTS: "/admin/broadcasts",
   HELPDESK: "/admin/helpdesk",
+  CHAT: {
+    CONVERSATIONS: "/chat/conversations",
+    MESSAGES: "/chat/messages",
+  },
+  SUPPORT: {
+    TICKET: "/support/ticket",
+  },
 } as const;
