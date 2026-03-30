@@ -9,10 +9,3 @@ export const REPORT_STATUSES = {
   RESOLVED: "RESOLVED",
   DISMISSED: "DISMISSED",
 } as const;
-
-export const TICKET_STATUSES = {
-  OPEN: "OPEN",
-  IN_PROGRESS: "IN_PROGRESS",
-  RESOLVED: "RESOLVED",
-  CLOSED: "CLOSED",
-} as const;
