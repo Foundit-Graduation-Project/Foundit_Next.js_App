@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useDebouncedCallback } from "use-debounce";
 import { Menu, Search, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +18,20 @@ import { AdminSidebar } from "./admin-sidebar";
 
 export function AdminHeader() {
   const [sheetOpen, setSheetOpen] = useState(false);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+
+  const handleSearch = useDebouncedCallback((term: string) => {
+    const params = new URLSearchParams(searchParams);
+    if (term) {
+      params.set('search', term);
+    } else {
+      params.delete('search');
+    }
+    // Only add search param if we are on a searchable page, for now just append it globally
+    router.replace(`${pathname}?${params.toString()}`);
+  }, 300);
 
   return (
     <header className="sticky top-0 z-40 w-full h-16 border-b bg-white">
@@ -51,7 +67,8 @@ export function AdminHeader() {
               id="admin-global-search"
               placeholder="Search across users, reports or communities..."
               className="pl-9 bg-gray-50 border-gray-200 text-sm placeholder:text-gray-400 focus-visible:ring-blue-500 focus-visible:border-blue-400"
-              readOnly
+              defaultValue={searchParams.get('search')?.toString()}
+              onChange={(e) => handleSearch(e.target.value)}
             />
           </div>
         </div>
