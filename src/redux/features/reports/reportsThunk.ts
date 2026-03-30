@@ -1,16 +1,20 @@
 import { reportsApi } from "@/lib/api/reports.api";
 import { getErrorMessage } from "@/lib/utils";
-import { ReportStatus } from "@/types/report.types";
+import { ReportStatus, FetchReportsPayload } from "@/types/report.types";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
 // fetch all reports
-export const fetchReports = createAsyncThunk(
-  "reports/fetchAll",
-  async (params: any, { rejectWithValue }) => {
+export const fetchReports = createAsyncThunk<FetchReportsPayload, any, { rejectValue: string }>("reports/fetchAll",
+  async (params, { rejectWithValue }) => {
     try {
+      console.log("[REDUX THUNK] Fetching reports with params:", params);
       const response = await reportsApi.getAllReports(params);
-      return response;
+      console.log("[REDUX THUNK] Raw API Response:", response);
+      
+      // response.data is where the actual reports and total are (due to JSend structure)
+      return response.data as FetchReportsPayload;
     } catch (error) {
+      console.error("[REDUX THUNK] Error fetching reports:", error);
       return rejectWithValue(getErrorMessage(error));
     }
   }
@@ -35,7 +39,7 @@ export const updateReportStatus = createAsyncThunk(
   async ({ id, status }: { id: string; status: ReportStatus }, { rejectWithValue }) => {
     try {
       const response = await reportsApi.updateReportStatus(id, status);
-      return response.data; 
+      return response.data;
     } catch (error) {
       return rejectWithValue(getErrorMessage(error));
     }
