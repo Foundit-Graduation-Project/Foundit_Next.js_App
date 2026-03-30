@@ -7,7 +7,7 @@ interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
 
 // 2. Create Base Instance
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000/api/v1",
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3001/api/v1",
   withCredentials: true, // 🔥 CRITICAL: Allows frontend to send/receive the refreshToken cookie
 });
 
@@ -46,21 +46,21 @@ api.interceptors.response.use(
 
       try {
         const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000/api/v1";
-        
+
         // Try to get a new access token using the HttpOnly cookie
         const res = await axios.get(`${baseURL}/auth/refresh-token`, {
           withCredentials: true,
         });
 
         const newAccessToken = res.data.data.accessToken;
-        
+
         if (typeof window !== "undefined") {
           localStorage.setItem("accessToken", newAccessToken);
         }
 
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         return api(originalRequest);
-        
+
       } catch (refreshError) {
         // If refresh-token fails, log the user out
         if (typeof window !== "undefined") {
