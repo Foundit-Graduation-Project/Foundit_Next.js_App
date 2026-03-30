@@ -58,3 +58,16 @@ export const fetchReportById = createAsyncThunk(
     }
   }
 );
+
+// delete report admin
+export const deleteReportThunk = createAsyncThunk(
+  "reports/deleteAdmin",
+  async (id: string, { rejectWithValue }) => {
+    try {
+      await reportsApi.deleteReportAdmin(id);
+      return id; // Return the id so we can filter it from local state
+    } catch (error) {
+      return rejectWithValue(getErrorMessage(error));
+    }
+  }
+);
