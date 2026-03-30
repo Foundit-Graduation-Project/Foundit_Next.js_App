@@ -10,7 +10,7 @@ export const reportsApi = {
    * @route   GET /api/v1/admin/stats
    */
   getAdminStats: async (): Promise<ApiResponse<any>> => {
-    const response = await api.get('/admin/stats');
+    const response = await api.get('/admin/reports/stats');
     return response.data;
   },
 
@@ -39,6 +39,15 @@ export const reportsApi = {
    */
   getReportById: async (id: string): Promise<ApiResponse<Report>> => {
     const response = await api.get(`/reports/${id}`);
+    return response.data;
+  },
+
+  /**
+   * @desc    Delete a report (Danger Zone)
+   * @route   DELETE /api/v1/admin/reports/:id
+   */
+  deleteReportAdmin: async (id: string): Promise<ApiResponse<null>> => {
+    const response = await api.delete(`/reports/${id}`);
     return response.data;
   }
 };
