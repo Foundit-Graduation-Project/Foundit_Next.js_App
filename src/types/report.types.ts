@@ -6,6 +6,8 @@ export type ReportImage = {
   publicId: string;
 };
 
+export type ReportDetail = Report & { aiScanScore?: number };
+
 export type Report = {
   _id: string;
   id?: string; // Mongoose virtual — not always present
@@ -40,12 +42,20 @@ export type ReportStats = {
   total: number;
 };
 
+export type ReportFilters = {
+  keyword?: string;
+  status?: ReportStatus | "";
+  type?: "LOST" | "FOUND" | "";
+}
+
 // used in slice
 export type ReportsState = {
   items: Report[];
+  selectedReport: ReportDetail | null;
   stats: ReportStats;
   loading: boolean;
   error: string | null;
+  filters: ReportFilters;
   pagination: {
     total: number;
     page: number;
