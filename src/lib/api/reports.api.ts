@@ -1,7 +1,7 @@
 
 import { ApiResponse, PaginatedResponse } from '@/types/api.types';
 import { Report, ReportStatus } from '@/types/report.types';
-import { axiosInstance } from './axios';
+import api from './axios';
 export const reportsApi = {
 
 
@@ -10,7 +10,7 @@ export const reportsApi = {
    * @route   GET /api/v1/admin/stats
    */
   getAdminStats: async (): Promise<ApiResponse<any>> => {
-    const response = await axiosInstance.get('/admin/stats');
+    const response = await api.get('/admin/stats');
     return response.data;
   },
 
@@ -20,7 +20,7 @@ export const reportsApi = {
    * @params  { page, limit, status, type, etc. }
    */
   getAllReports: async (params?: any): Promise<PaginatedResponse<Report[]>> => {
-    const response = await axiosInstance.get('/reports', { params });
+    const response = await api.get('/reports', { params });
     return response.data;
   },
 
@@ -29,7 +29,7 @@ export const reportsApi = {
    * @route   PATCH /api/v1/admin/report/:id/status
    */
   updateReportStatus: async (id: string, status: ReportStatus): Promise<ApiResponse<Report>> => {
-    const response = await axiosInstance.patch(`/admin/report/${id}/status`, { status });
+    const response = await api.patch(`/admin/report/${id}/status`, { status });
     return response.data;
   },
 
@@ -38,7 +38,7 @@ export const reportsApi = {
    * @route   GET /api/v1/reports/:id
    */
   getReportById: async (id: string): Promise<ApiResponse<Report>> => {
-    const response = await axiosInstance.get(`/reports/${id}`);
+    const response = await api.get(`/reports/${id}`);
     return response.data;
   }
 };
