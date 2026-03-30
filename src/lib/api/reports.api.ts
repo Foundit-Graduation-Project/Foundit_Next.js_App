@@ -16,11 +16,11 @@ export const reportsApi = {
 
   /**
    * @desc    Fetch all reports with pagination and filtering support
-   * @route   GET /api/v1/reports
+   * @route   GET /api/v1/admin/reports
    * @params  { page, limit, status, type, etc. }
    */
   getAllReports: async (params?: any): Promise<PaginatedResponse<Report[]>> => {
-    const response = await api.get('/reports', { params });
+    const response = await api.get('/admin/reports', { params });
     return response.data;
   },
 
