@@ -1,12 +1,13 @@
 import { 
   LayoutDashboard, 
-  User, 
   Users, 
   Flag, 
   Users2, 
   CreditCard, 
   Rss, 
-  HelpCircle 
+  HelpCircle, 
+  Settings,
+  LogOut
 } from "lucide-react";
 import { ADMIN_ROUTES } from "./routes";
 
@@ -15,11 +16,6 @@ export const SIDEBAR_ITEMS = [
     label: "Dashboard",
     href: ADMIN_ROUTES.DASHBOARD,
     icon: LayoutDashboard,
-  },
-  {
-    label: "Profile",
-    href: ADMIN_ROUTES.PROFILE,
-    icon: User,
   },
   {
     label: "Users",
@@ -50,5 +46,16 @@ export const SIDEBAR_ITEMS = [
     label: "Helpdesk",
     href: ADMIN_ROUTES.HELPDESK,
     icon: HelpCircle,
+  },
+  {
+    label: "Settings",
+    href: ADMIN_ROUTES.PROFILE,
+    icon: Settings,
+  },
+  {
+    label: "Logout",
+    href: "#",
+    icon: LogOut,
+    isLogout: true,
   },
 ];
