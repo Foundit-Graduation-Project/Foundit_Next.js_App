@@ -6,6 +6,13 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils/cn";
 import { SIDEBAR_ITEMS } from "@/lib/constants/sidebar-items";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useDispatch } from "react-redux";
+import { useRouter } from "next/navigation";
+import { logoutAdmin } from "@/redux/features/auth/authThunk";
+import { AppDispatch } from "@/redux/store";
+import { AUTH_ROUTES } from "@/lib/constants/routes";
+import { toast } from "react-hot-toast";
+import { Search } from "lucide-react";
 
 interface AdminSidebarProps {
   /** Called when a nav link is clicked — used by the mobile Sheet to close itself */
@@ -14,14 +21,27 @@ interface AdminSidebarProps {
 
 export function AdminSidebar({ onNavigate }: AdminSidebarProps) {
   const pathname = usePathname();
+  const dispatch = useDispatch<AppDispatch>();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await dispatch(logoutAdmin()).unwrap();
+      toast.success("Logged out successfully");
+      router.push(AUTH_ROUTES.LOGIN);
+      if (onNavigate) onNavigate(); // Close mobile sheet if open
+    } catch (error) {
+      toast.error("Failed to logout");
+    }
+  };
 
   return (
     <div className="flex h-full flex-col bg-white border-r border-gray-100">
 
       {/* ── Brand ─────────────────────────────────── */}
       <div className="flex items-center gap-3 px-5 py-5 border-b border-gray-100 shrink-0">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-white font-bold text-base shrink-0 select-none">
-          F
+        <div className="bg-blue-600 w-9 h-9 rounded-lg flex items-center justify-center text-white shadow-blue-200 shadow-md">
+          <Search className="w-5 h-5" />
         </div>
         <div className="min-w-0">
           <p className="font-bold text-gray-900 text-sm leading-tight truncate">
@@ -41,26 +61,39 @@ export function AdminSidebar({ onNavigate }: AdminSidebarProps) {
         <ul className="space-y-0.5">
           {SIDEBAR_ITEMS.map((item) => {
             const Icon = item.icon;
+            const isLogout = (item as any).isLogout;
             const isActive =
-              pathname === item.href ||
-              (item.href !== "/admin" && pathname.startsWith(item.href));
+              !isLogout &&
+              (pathname === item.href ||
+                (item.href !== "/admin" && pathname.startsWith(item.href)));
+
+            const handleClick = (e: React.MouseEvent) => {
+              if (isLogout) {
+                e.preventDefault();
+                handleLogout();
+              } else if (onNavigate) {
+                onNavigate();
+              }
+            };
 
             return (
-              <li key={item.href}>
+              <li key={item.label}>
                 <Link
                   href={item.href}
-                  onClick={onNavigate}
+                  onClick={handleClick}
                   className={cn(
                     "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors duration-150 select-none",
                     isActive
                       ? "bg-blue-50 text-blue-600"
-                      : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
+                      : isLogout
+                        ? "text-red-500 hover:bg-red-50 hover:text-red-600"
+                        : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
                   )}
                 >
                   <Icon
                     className={cn(
                       "h-[18px] w-[18px] shrink-0",
-                      isActive ? "text-blue-600" : "text-gray-400"
+                      isActive ? "text-blue-600" : isLogout ? "text-red-400 group-hover:text-red-600" : "text-gray-400"
                     )}
                     aria-hidden="true"
                   />
