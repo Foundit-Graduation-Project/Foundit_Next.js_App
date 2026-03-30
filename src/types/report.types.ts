@@ -1,5 +1,6 @@
-export type ReportStatus = "PENDING" | "RESOLVED" | "DISMISSED";
+import { User } from "./user.types";
 
+export type ReportStatus = "OPEN" | "REJECTED" | "MATCHED" | "RESOLVED";
 export type Report = {
   id: string;
   title: string;
@@ -8,4 +9,32 @@ export type Report = {
   reporterId: string;
   targetId: string;
   createdAt: string;
+
+  images: string[];
+  category: string;
+  locationName: string;
+  location: string;
+  type: string;
+  user: User;
+};
+
+export type ReportStats = {
+  OPEN: number;
+  REJECTED: number;
+  MATCHED: number;
+  RESOLVED: number;
+  total: number;
+};
+
+// used in slice
+export type ReportsState = {
+  items: Report[];
+  stats: ReportStats;
+  loading: boolean;
+  error: string | null;
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+  };
 };
