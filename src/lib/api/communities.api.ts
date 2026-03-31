@@ -9,4 +9,8 @@ export const communitiesApi = {
     const response = await api.post("/admin/communities", data);
     return response.data;
   },
+  toggleCommunityStatus: async (id: string, status: string) => {
+    const response = await api.patch(`/admin/communities/${id}/status`, { subscriptionStatus: status });
+    return response.data;
+  },
 };
