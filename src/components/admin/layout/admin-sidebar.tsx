@@ -13,6 +13,10 @@ import { AppDispatch } from "@/redux/store";
 import { AUTH_ROUTES } from "@/lib/constants/routes";
 import { toast } from "react-hot-toast";
 import { Search } from "lucide-react";
+import { useAppSelector } from "@/redux/hooks";
+import { selectUser } from "@/redux/features/auth/authSelectors";
+import { getImageUrl } from "@/lib/utils/get-image-url";
+import { useMounted } from "@/hooks/use-mounted";
 
 interface AdminSidebarProps {
   /** Called when a nav link is clicked — used by the mobile Sheet to close itself */
@@ -23,6 +27,8 @@ export function AdminSidebar({ onNavigate }: AdminSidebarProps) {
   const pathname = usePathname();
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
+  const user = useAppSelector(selectUser);
+  const isMounted = useMounted();
 
   const handleLogout = async () => {
     try {
@@ -109,16 +115,21 @@ export function AdminSidebar({ onNavigate }: AdminSidebarProps) {
       <div className="border-t border-gray-100 p-4 shrink-0">
         <div className="flex items-center gap-3 rounded-lg bg-gray-50 px-3 py-2.5">
           <Avatar className="h-8 w-8 shrink-0">
-            <AvatarImage src="" alt="Admin user" />
-            <AvatarFallback className="text-xs bg-blue-100 text-blue-700 font-semibold">
-              AS
+            <AvatarImage 
+              src={isMounted ? getImageUrl(user?.avatar, user?.name) : ""} 
+              alt={isMounted ? (user?.name || "Admin") : "Admin"} 
+            />
+            <AvatarFallback className="text-[10px] bg-blue-100 text-blue-700 font-bold uppercase">
+              {isMounted ? user?.name?.substring(0, 2) || "AD" : "AD"}
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold text-gray-900 truncate leading-tight">
-              Alex Sterling
+              {isMounted ? user?.name || "Admin User" : "Admin User"}
             </p>
-            <p className="text-xs text-gray-400 truncate mt-0.5">Super Admin</p>
+            <p className="text-[10px] text-gray-400 truncate mt-0.5 uppercase tracking-wide font-medium">
+              {isMounted ? user?.role?.replace("_", " ") || "Administrator" : "Administrator"}
+            </p>
           </div>
         </div>
       </div>
