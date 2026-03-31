@@ -17,7 +17,7 @@ export const connectSocket = (token: string) => {
     });
 
     socket.on("connect_error", (err) => {
-      console.error("[Socket] Connection error:", err.message);
+      console.log("[Socket] Connection error:", err.message);
     });
 
     socket.on("disconnect", (reason) => {
