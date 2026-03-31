@@ -1,18 +1,25 @@
 import React from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
-import { setPage } from "@/redux/features/reports/reportsSlice";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-export function Pagination() {
-  const dispatch = useDispatch();
-  const { pagination } = useSelector((state: RootState) => state.reports);
-  const { page, totalPages } = pagination;
+interface PaginationProps {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  totalItems?: number;
+  itemsPerPage?: number;
+}
 
+export function Pagination({ 
+  currentPage, 
+  totalPages, 
+  onPageChange,
+  totalItems,
+  itemsPerPage
+}: PaginationProps) {
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
-      dispatch(setPage(newPage));
+      onPageChange(newPage);
     }
   };
 
@@ -23,8 +30,8 @@ export function Pagination() {
       <Button
         variant="outline"
         size="sm"
-        disabled={page === 1}
-        onClick={() => handlePageChange(page - 1)}
+        disabled={currentPage === 1}
+        onClick={() => handlePageChange(currentPage - 1)}
         className="h-8 w-8 p-0"
       >
         <ChevronLeft className="h-4 w-4" />
@@ -34,7 +41,7 @@ export function Pagination() {
         {[...Array(totalPages)].map((_, i) => (
           <Button
             key={i + 1}
-            variant={page === i + 1 ? "default" : "outline"}
+            variant={currentPage === i + 1 ? "default" : "outline"}
             size="sm"
             onClick={() => handlePageChange(i + 1)}
             className="h-8 w-8 p-0 text-xs font-bold"
@@ -47,8 +54,8 @@ export function Pagination() {
       <Button
         variant="outline"
         size="sm"
-        disabled={page === totalPages}
-        onClick={() => handlePageChange(page + 1)}
+        disabled={currentPage === totalPages}
+        onClick={() => handlePageChange(currentPage + 1)}
         className="h-8 w-8 p-0"
       >
         <ChevronRight className="h-4 w-4" />
