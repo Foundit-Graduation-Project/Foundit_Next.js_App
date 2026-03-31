@@ -34,18 +34,18 @@ const transactionsSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchTransactions.fulfilled, (state, action) => {
+      .addCase(fetchTransactions.fulfilled, (state, action: any) => {
         state.loading = false;
         state.items = action.payload.transactions;
         state.totalCount = action.payload.totalCount;
-        state.totalPages = Math.ceil(action.payload.totalCount / 10); // Assuming 10 limit
+        state.totalPages = Math.ceil(action.payload.totalCount / 10) || 1;
       })
       .addCase(fetchTransactions.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
       // Fetch Stats
-      .addCase(fetchTransactionStats.fulfilled, (state, action) => {
+      .addCase(fetchTransactionStats.fulfilled, (state, action: any) => {
         state.stats = action.payload;
       });
   },

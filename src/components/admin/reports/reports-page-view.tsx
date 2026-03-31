@@ -4,6 +4,7 @@ import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { fetchReports } from "@/redux/features/reports/reportsThunk";
 import { ReportsTable } from "./reports-table";
 import { ReportsFilters } from "./reports-filters";
+import { setPage } from "@/redux/features/reports/reportsSlice";
 import { Pagination } from "@/components/shared/pagination";
 
 export const ReportsPageView = () => {
@@ -44,7 +45,13 @@ export const ReportsPageView = () => {
               {((pagination.page - 1) * pagination.limit) + 1}-{Math.min(pagination.page * pagination.limit, pagination.total)}
             </span> of <span className="text-gray-900 font-bold">{pagination.total}</span> reports
           </p>
-          <Pagination />
+          <Pagination 
+            currentPage={pagination.page}
+            totalPages={pagination.totalPages}
+            onPageChange={(page) => dispatch(setPage(page))}
+            totalItems={pagination.total}
+            itemsPerPage={pagination.limit}
+          />
         </div>
       </div>
     </div>
