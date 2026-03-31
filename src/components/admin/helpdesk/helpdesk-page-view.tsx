@@ -27,55 +27,20 @@ export function HelpdeskPageView() {
   // ── Fetch conversations & setup socket ────────────────────────────────────
   useEffect(() => {
     dispatch(fetchConversationsThunk());
-    const token = localStorage.getItem("accessToken") || "";
-    const socket = connectSocket(token);
-    if (socket) {
-      socket.on("receiveMessage", (message: any) => {
-        dispatch(addSocketMessage(message));
-        // Auto-mark as seen if this conversation is open
-        const msgChatId =
-          message.conversationId?._id ||
-          message.conversationId ||
-          message.conversation?._id ||
-          message.conversation;
-        if (msgChatId === activeId) {
-          socket.emit("markAsSeen", { conversationId: activeId });
-        }
-      });
-      socket.on("messagesSeen", (data: any) => {
-        dispatch(updateMessagesSeen(data));
-      });
-      socket.on("typing", (data: any) => {
-        dispatch(setTypingStatus({ chatId: data.conversationId, isTyping: true }));
-      });
-      socket.on("stopTyping", (data: any) => {
-        dispatch(setTypingStatus({ chatId: data.conversationId, isTyping: false }));
-      });
-      socket.on("onlineUsers", (users: string[]) => {
-        dispatch(setOnlineUsers(users));
-      });
-      socket.on("ticketClaimed", (data: any) => {
-        dispatch(updateConversationAssignment(data));
-      });
-    }
+    
     const handleFocus = () => {
+      const socket = getSocket();
       if (activeId && socket) {
         socket.emit("markAsSeen", { conversationId: activeId });
       }
     };
+
     window.addEventListener("focus", handleFocus);
     return () => {
-      if (socket) {
-        socket.off("receiveMessage");
-        socket.off("messagesSeen");
-        socket.off("typing");
-        socket.off("stopTyping");
-        socket.off("onlineUsers");
-        socket.off("ticketClaimed");
-      }
       window.removeEventListener("focus", handleFocus);
     };
   }, [dispatch, activeId]);
+
  
   // ── Emit markAsSeen when switching conversations ────────────────────────
   useEffect(() => {

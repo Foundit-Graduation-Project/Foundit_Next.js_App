@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AppProvider } from "@/providers/app-provider";
 import { Toaster } from "react-hot-toast";
+import SocketNotificationHandler from "@/components/SocketNotificationHandler";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,9 +33,11 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <AppProvider>
           {children}
+          <SocketNotificationHandler />
           <Toaster position="top-center" />
         </AppProvider>
       </body>
     </html>
   );
 }
+
