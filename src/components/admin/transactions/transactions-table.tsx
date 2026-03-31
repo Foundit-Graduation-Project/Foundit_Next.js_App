@@ -22,10 +22,13 @@ interface Transaction {
     avatar?: string;
   };
   amount: number;
+  currency?: string;
   type: string;
   createdAt: string;
   status: string;
   stripePaymentId?: string;
+  billingName?: string;
+  billingEmail?: string;
 }
 
 interface TransactionsTableProps {
@@ -99,13 +102,17 @@ export function TransactionsTable({ transactions, isLoading }: TransactionsTable
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col">
-                      <span className="text-sm font-bold text-gray-900">{tx.user?.name || "Deleted User"}</span>
-                      <span className="text-xs text-gray-500 font-medium">{tx.user?.email}</span>
+                      <span className="text-sm font-bold text-gray-900">
+                        {tx.billingName || tx.user?.name || "Deleted User"}
+                      </span>
+                      <span className="text-xs text-gray-500 font-medium">
+                        {tx.billingEmail || tx.user?.email}
+                      </span>
                     </div>
                   </div>
                 </TableCell>
                 <TableCell className="font-bold text-gray-900" suppressHydrationWarning>
-                  {formatCurrency(tx.amount)}
+                  {formatCurrency(tx.amount, tx.currency)}
                 </TableCell>
                 <TableCell className="text-center">
                   <span className={cn(

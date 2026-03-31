@@ -24,6 +24,7 @@ export function TransactionsPageView() {
   const dispatch = useDispatch<AppDispatch>();
   const [page, setPage] = useState(1);
   const limit = 10;
+  const [isMounted, setIsMounted] = useState(false);
 
   const transactions = useSelector(selectTransactions);
   const loading = useSelector(selectTransactionsLoading);
@@ -33,18 +34,36 @@ export function TransactionsPageView() {
   const error = useSelector(selectTransactionsError);
 
   useEffect(() => {
+    setIsMounted(true);
     dispatch(fetchTransactionStats());
   }, [dispatch]);
 
   useEffect(() => {
-    dispatch(fetchTransactions({ page, limit }));
-  }, [dispatch, page]);
+    if (isMounted) {
+      dispatch(fetchTransactions({ page, limit }));
+    }
+  }, [dispatch, page, isMounted]);
 
   useEffect(() => {
     if (error) {
       toast.error(error);
     }
   }, [error]);
+
+  if (!isMounted) {
+    return (
+      <div className="space-y-8 p-6 lg:p-10 max-w-7xl mx-auto">
+        <div className="animate-pulse space-y-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-32 bg-gray-100 rounded-2xl" />
+            ))}
+          </div>
+          <div className="h-96 bg-gray-100 rounded-2xl" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 p-6 lg:p-10 max-w-7xl mx-auto">
