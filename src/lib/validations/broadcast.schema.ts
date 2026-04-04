@@ -1,9 +1,8 @@
 import { z } from "zod";
 
 export const broadcastSchema = z.object({
-  category: z.enum(["ALERT", "SYSTEM", "MATCH", "MESSAGE"], {
-    errorMap: () => ({ message: "Please select a valid category" }),
-  }),
+  category: z.enum(["ALERT", "SYSTEM", "MATCH", "MESSAGE"]as const,
+  { error: "Please select a valid category" }),
   title: z
     .string()
     .min(3, "Title must be at least 3 characters")
