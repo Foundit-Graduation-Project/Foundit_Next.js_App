@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 
 import { adminLoginSchema, AdminLoginFormValues } from "@/lib/validations/auth.schema";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks"; 
+import { ADMIN_ROUTES } from "@/lib/constants/routes";
 import { loginAdmin, logoutAdmin } from "@/redux/features/auth/authThunk";
 
 export function AdminLoginForm() {
@@ -41,7 +42,10 @@ export function AdminLoginForm() {
       }
 
       toast.success("Welcome back, Admin!");
-      router.push("/admin/overview"); 
+      // Delay to ensure token sync
+      setTimeout(() => {
+        router.replace(ADMIN_ROUTES.DASHBOARD);
+      }, 500);
       
     } else {
       toast.error((resultAction.payload as string) || "Invalid credentials.");
