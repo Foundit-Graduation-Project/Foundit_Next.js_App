@@ -2,39 +2,45 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAppSelector } from "@/redux/hooks";
-// Ensure you have these selectors exported in authSelectors.ts
+import { useAppSelector, useAppDispatch } from "@/redux/hooks";
 import { selectIsAuthenticated, selectUser } from "@/redux/features/auth/authSelectors";
 import { AUTH_ROUTES } from "@/lib/constants/routes";
+import { hydrateAuth } from "@/redux/features/auth/authSlice";
 import toast from "react-hot-toast";
 
 export function useAuthGuard() {
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const user = useAppSelector(selectUser);
   const [isHydrated, setIsHydrated] = useState(false);
 
+  // 🔥 FIX: Hydrate auth on mount AND protect routes
   useEffect(() => {
-    // 🔥 FIX: Mark as hydrated after mount
+    // 1. First, hydrate from localStorage
+    dispatch(hydrateAuth());
     setIsHydrated(true);
-  }, []);
+  }, [dispatch]);
 
+  // 2. After hydration, check auth state
   useEffect(() => {
-    // 🔥 FIX: Only run auth checks AFTER hydration is complete
-    if (!isHydrated) return;
+    // Small delay to ensure hydration is complete
+    const timer = setTimeout(() => {
+      // Not logged in? Redirect to login
+      if (!isAuthenticated) {
+        router.replace(AUTH_ROUTES.LOGIN);
+        return;
+      }
 
-    // 1. Not logged in at all? Kick to login.
-    if (!isAuthenticated) {
-      router.replace(AUTH_ROUTES.LOGIN);
-      return;
-    }
+      // Logged in but not admin? Log them out and redirect
+      if (user && user.role !== "super_admin" && user.role !== "community_admin") {
+        toast.error("Access Denied: Admin privileges required.");
+        router.replace(AUTH_ROUTES.LOGIN);
+      }
+    }, 100);
 
-    // 2. Logged in, but NOT an admin? Kick to login and show error.
-    if (user && user.role !== "super_admin" && user.role !== "community_admin") {
-      toast.error("Access Denied: Admin privileges required.");
-      router.replace(AUTH_ROUTES.LOGIN);
-    }
-  }, [isHydrated, isAuthenticated, user, router]);
+    return () => clearTimeout(timer);
+  }, [isAuthenticated, user, router]);
 
   return { isAuthenticated, user, isHydrated };
 }

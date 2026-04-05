@@ -3,26 +3,21 @@ import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const refreshToken = request.cookies.get("refreshToken");
+  
+  // 🔥 FIX: For cross-origin deployments (Netlify ↔ Railway), 
+  // HTTP-only cookies won't be sent across origins.
+  // We rely on client-side auth instead via localStorage.
+  // This middleware only ensures unprotected routes work.
 
-  // Debug logging in development
-  if (process.env.NODE_ENV === "development") {
-    console.log(`[Middleware] Path: ${pathname}, Has refreshToken: ${!!refreshToken}`);
-  }
-
-  // 🔥 FIX: Allow unauthenticated users to reach login page
-  if (pathname === "/admin-login" || pathname.startsWith("/forgot-password") || pathname.startsWith("/reset-password")) {
+  // Allow public routes
+  if (pathname === "/admin-login" || 
+      pathname.startsWith("/forgot-password") || 
+      pathname.startsWith("/reset-password")) {
     return NextResponse.next();
   }
 
-  // Protect /admin routes
-  if (pathname.startsWith("/admin")) {
-    if (!refreshToken) {
-      const url = new URL("/admin-login", request.url);
-      return NextResponse.redirect(url);
-    }
-  }
-
+  // For /admin routes, let the useAuthGuard hook handle protection client-side
+  // since cookies won't work across origins anyway
   return NextResponse.next();
 }
 
