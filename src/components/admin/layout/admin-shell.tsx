@@ -1,6 +1,7 @@
 import React, { Suspense } from "react";
 import { AdminHeader } from "./admin-header";
 import { AdminSidebar } from "./admin-sidebar";
+import { AdminShellContent } from "./admin-shell-content";
 
 function HeaderSkeleton() {
   return (
@@ -19,23 +20,25 @@ function HeaderSkeleton() {
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen w-full bg-muted/20">
+    <AdminShellContent>
+      <div className="flex min-h-screen w-full bg-muted/20">
 
-      {/* Desktop sidebar — fixed on left, hidden on tablet & mobile */}
-      <aside className="hidden md:flex md:flex-col md:fixed md:inset-y-0 md:left-0 md:w-64 z-30">
-        <AdminSidebar />
-      </aside>
+        {/* Desktop sidebar — fixed on left, hidden on tablet & mobile */}
+        <aside className="hidden md:flex md:flex-col md:fixed md:inset-y-0 md:left-0 md:w-64 z-30">
+          <AdminSidebar />
+        </aside>
 
-      {/* Main area — offset by sidebar width on desktop */}
-      <div className="flex flex-1 flex-col min-w-0 w-full md:ml-64">
-        <Suspense fallback={<HeaderSkeleton />}>
-          <AdminHeader />
-        </Suspense>
-        <main className="flex-1 p-4 md:p-6 lg:p-8">
-          {children}
-        </main>
+        {/* Main area — offset by sidebar width on desktop */}
+        <div className="flex flex-1 flex-col min-w-0 w-full md:ml-64">
+          <Suspense fallback={<HeaderSkeleton />}>
+            <AdminHeader />
+          </Suspense>
+          <main className="flex-1 p-4 md:p-6 lg:p-8">
+            {children}
+          </main>
+        </div>
+
       </div>
-
-    </div>
+    </AdminShellContent>
   );
 }

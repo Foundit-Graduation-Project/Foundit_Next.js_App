@@ -43,27 +43,11 @@ export function AdminLoginForm() {
 
       toast.success("Welcome back, Admin!");
       
-      // Wait for refreshToken cookie to be set before redirecting
-      const waitForCookie = () => {
-        const cookies = document.cookie;
-        if (cookies.includes('refreshToken')) {
-          router.replace(ADMIN_ROUTES.DASHBOARD);
-        } else {
-          // Retry after 100ms if cookie not found yet
-          setTimeout(waitForCookie, 100);
-        }
-      };
-
-      // Start waiting, with a safety timeout of 3 seconds
-      const timeout = setTimeout(() => {
-        console.warn('Cookie not set within timeout, redirecting anyway');
-        router.replace(ADMIN_ROUTES.DASHBOARD);
-      }, 3000);
-
+      // Redirect immediately - Redux state is already updated with user data
+      // The refreshToken cookie is HTTP-only and set by backend automatically
       setTimeout(() => {
-        clearTimeout(timeout);
-        waitForCookie();
-      }, 300); // Give the response time to arrive
+        router.replace(ADMIN_ROUTES.DASHBOARD);
+      }, 500); // Small delay to ensure toast is visible
       
     } else {
       toast.error((resultAction.payload as string) || "Invalid credentials.");
