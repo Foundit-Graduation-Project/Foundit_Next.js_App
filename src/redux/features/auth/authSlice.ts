@@ -5,27 +5,46 @@ interface AuthState {
   user: any | null;
   isLoading: boolean;
   error: string | null;
+  isHydrated: boolean; // 🔥 NEW: Track hydration state
 }
 
-// Next.js SSR Check for localStorage
+// 🔥 FIX: Lazy initialization for SSR safety
 const getUserFromStorage = () => {
   if (typeof window !== "undefined") {
-    const saved = localStorage.getItem("user");
-    return saved ? JSON.parse(saved) : null;
+    try {
+      const saved = localStorage.getItem("user");
+      return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+      console.error("[Auth] Error parsing user from storage:", e);
+      return null;
+    }
   }
   return null;
 };
 
 const initialState: AuthState = {
-  user: getUserFromStorage(),
+  user: null, // 🔥 CHANGED: Start with null for SSR
   isLoading: false,
   error: null,
+  isHydrated: false, // 🔥 NEW: Track hydration
 };
 
 const authSlice = createSlice({
   name: "auth",
   initialState,
-  reducers: {},
+  reducers: {
+    // 🔥 NEW: Hydrate from localStorage when component mounts
+    hydrateAuth: (state) => {
+      if (typeof window !== "undefined") {
+        const user = getUserFromStorage();
+        const token = localStorage.getItem("accessToken");
+        if (user && token) {
+          state.user = user;
+        }
+      }
+      state.isHydrated = true;
+    },
+  },
   extraReducers: (builder) => {
     builder
       // Login
@@ -33,6 +52,7 @@ const authSlice = createSlice({
       .addCase(loginAdmin.fulfilled, (state, action) => {
         state.isLoading = false;
         state.user = action.payload.user;
+        state.isHydrated = true; // 🔥 Mark hydrated on successful login
         if (typeof window !== "undefined") {
           localStorage.setItem("user", JSON.stringify(action.payload.user));
           localStorage.setItem("accessToken", action.payload.accessToken);
@@ -45,6 +65,7 @@ const authSlice = createSlice({
       // Logout
       .addCase(logoutAdmin.fulfilled, (state) => {
         state.user = null;
+        state.isHydrated = true;
         if (typeof window !== "undefined") {
           localStorage.removeItem("user");
           localStorage.removeItem("accessToken");
@@ -54,7 +75,7 @@ const authSlice = createSlice({
       .addCase(updateProfile.pending, (state) => { state.isLoading = true; state.error = null; })
       .addCase(updateProfile.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.user = action.payload.user; // Extract user from payload
+        state.user = action.payload.user;
         if (typeof window !== "undefined") {
           localStorage.setItem("user", JSON.stringify(action.payload.user));
         }
@@ -67,7 +88,7 @@ const authSlice = createSlice({
       .addCase(updateAvatar.pending, (state) => { state.isLoading = true; state.error = null; })
       .addCase(updateAvatar.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.user = action.payload.user; // Extract user from payload
+        state.user = action.payload.user;
         if (typeof window !== "undefined") {
           localStorage.setItem("user", JSON.stringify(action.payload.user));
         }
@@ -88,4 +109,5 @@ const authSlice = createSlice({
   },
 });
 
+export const { hydrateAuth } = authSlice.actions;
 export default authSlice.reducer;

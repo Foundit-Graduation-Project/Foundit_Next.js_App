@@ -5,10 +5,20 @@ interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
 }
 
+// 🔥 FIX: Read from environment variable with proper fallback
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000/api/v1";
+
+// Debug logging in development
+if (typeof window !== "undefined" && process.env.NODE_ENV === "development") {
+  console.log("[API Config] Using base URL:", BASE_URL);
+}
+
 // 2. Create Base Instance
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000/api/v1",
-  withCredentials: true, // 🔥 CRITICAL: Allows frontend to send/receive the refreshToken cookie
+  baseURL: BASE_URL,
+  withCredentials: true, // 🔥 CRITICAL: Allows frontend to send/receive cookies
+  // Add timeout for production stability
+  timeout: process.env.NODE_ENV === "production" ? 30000 : 0,
 });
 
 // 3. Request Interceptor
@@ -26,16 +36,26 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// 4. Response Interceptor
+// 4. Response Interceptor with improved logging
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    if (process.env.NODE_ENV === "development") {
+      console.log("[API Response] Status:", response.status);
+    }
+    return response;
+  },
   async (error) => {
     const originalRequest = error.config as CustomAxiosRequestConfig;
 
     const isLoginRequest = originalRequest?.url?.includes("/auth/login");
     const isRefreshRequest = originalRequest?.url?.includes("/auth/refresh-token");
 
-    // If backend returns 401, we haven't retried yet, and it's NOT a login/refresh attempt
+    // Added logging for debugging
+    if (process.env.NODE_ENV === "development") {
+      console.error("[API Error]", error.response?.status, originalRequest?.url);
+    }
+
+    // If backend returns 401, attempt refresh token flow
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
@@ -45,10 +65,8 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000/api/v1";
-
-        // Try to get a new access token using the HttpOnly cookie
-        const res = await axios.get(`${baseURL}/auth/refresh-token`, {
+        // Use the same BASE_URL to ensure consistency
+        const res = await axios.get(`${BASE_URL}/auth/refresh-token`, {
           withCredentials: true,
         });
 
@@ -62,11 +80,12 @@ api.interceptors.response.use(
         return api(originalRequest);
 
       } catch (refreshError) {
-        // If refresh-token fails, log the user out
+        console.error("[API] Token refresh failed:", refreshError);
         if (typeof window !== "undefined") {
           localStorage.removeItem("accessToken");
           localStorage.removeItem("user");
-          window.location.href = "/admin-login"; // 🔥 Redirect to Admin Login!
+          // 🔥 FIXED: Redirect to proper auth page
+          window.location.href = "/admin-login";
         }
         return Promise.reject(refreshError);
       }

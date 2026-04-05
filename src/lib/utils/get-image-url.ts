@@ -22,7 +22,7 @@ export const getImageUrl = (
   if (!url) return fallback;
   if (url.startsWith("http")) return url;
   
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
   // Ensure we don't have double slashes
   const cleanPath = url.startsWith("/") ? url : `/${url}`;
   return `${baseUrl}${cleanPath}`;

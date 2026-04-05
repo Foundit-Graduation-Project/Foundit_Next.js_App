@@ -5,11 +5,22 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const refreshToken = request.cookies.get("refreshToken");
 
-  // Logic: If trying to access /admin and NO refresh token exists, move to login
-  console.log("Middleware: refreshToken cookie:", !!refreshToken, "path:", pathname);
-  if (!refreshToken && pathname.startsWith("/admin")) {
-    const url = new URL("/admin-login", request.url);
-    return NextResponse.redirect(url);
+  // Debug logging in development
+  if (process.env.NODE_ENV === "development") {
+    console.log(`[Middleware] Path: ${pathname}, Has refreshToken: ${!!refreshToken}`);
+  }
+
+  // 🔥 FIX: Allow unauthenticated users to reach login page
+  if (pathname === "/admin-login" || pathname.startsWith("/forgot-password") || pathname.startsWith("/reset-password")) {
+    return NextResponse.next();
+  }
+
+  // Protect /admin routes
+  if (pathname.startsWith("/admin")) {
+    if (!refreshToken) {
+      const url = new URL("/admin-login", request.url);
+      return NextResponse.redirect(url);
+    }
   }
 
   return NextResponse.next();
