@@ -1,0 +1,11 @@
+export const USER_STATUSES = {
+  ACTIVE: "ACTIVE",
+  INACTIVE: "INACTIVE",
+  SUSPENDED: "SUSPENDED",
+} as const;
+
+export const REPORT_STATUSES = {
+  PENDING: "PENDING",
+  RESOLVED: "RESOLVED",
+  DISMISSED: "DISMISSED",
+} as const;
